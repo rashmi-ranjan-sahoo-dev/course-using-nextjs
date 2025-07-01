@@ -1,0 +1,36 @@
+/course-selling-app
+├── app
+│   ├── layout.tsx
+│   ├── page.tsx                  # Homepage
+│   ├── auth/
+│   │   ├── login/page.tsx
+│   │   └── signup/page.tsx
+│   ├── dashboard/
+│   │   ├── page.tsx              # User dashboard
+│   │   └── courses/[id]/page.tsx
+│   ├── admin/
+│   │   ├── page.tsx              # Admin dashboard
+│   │   └── create-course/page.tsx
+│   └── api/
+│       ├── auth/[...nextauth]/route.ts
+│       ├── courses/route.ts
+│       └── connect.ts            # MongoDB connection
+├── components/
+│   ├── CourseCard.tsx
+│   ├── Header.tsx
+│   └── AuthForm.tsx
+├── lib/
+│   ├── mongodb.ts                # MongoDB client
+│   └── auth.ts                   # Auth utilities
+├── models/
+│   ├── User.ts
+│   └── Course.ts
+├── types/
+│   └── index.d.ts
+├── public/
+├── styles/
+│   └── globals.css
+├── .env.local
+├── tailwind.config.js
+├── tsconfig.json
+└── package.json
