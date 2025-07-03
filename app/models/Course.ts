@@ -32,5 +32,5 @@ const courseSchema = new Schema<ICourse>({
     videos: [videoSchema],
 });
 
-export const Course = models.Course || mongoose.model<ICourse>("Course", courseSchema);
+export const CourseModel = models.Course || mongoose.model<ICourse>("Course", courseSchema);
 

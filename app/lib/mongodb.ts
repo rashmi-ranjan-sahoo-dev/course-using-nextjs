@@ -1,11 +1,18 @@
 import mongoose from "mongoose";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MONGODB_URI: any = process.env.MONGO_URI;
-console.log(MONGODB_URI)
+const MONGO_URI: any = process.env.MONGO_URI;
 
-export const connectDB = async () =>{
-    if(mongoose.connection.readyState >= 1) return;
+console.log("🌐 MONGO_URI =", MONGO_URI); // Debug print
 
-    return mongoose.connect(MONGODB_URI)
-}
+export const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log("✅ MongoDB connected");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    throw error;
+  }
+};

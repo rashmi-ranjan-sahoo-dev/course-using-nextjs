@@ -15,4 +15,4 @@ const userSchema = new Schema<IUser> ({
     lastName: String,
 });
 
-export const User = models.User || mongoose.model<IUser>("User", userSchema);
+export const UserModel = models.User || mongoose.model<IUser>("User", userSchema);

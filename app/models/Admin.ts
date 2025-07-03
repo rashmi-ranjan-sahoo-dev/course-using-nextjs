@@ -15,4 +15,4 @@ const adminSchema = new Schema<IAdmin> ({
     lastName: String,
 });
 
-export const User = models.User || mongoose.model<IAdmin>("Admin", adminSchema);
+export const AdminModel = models.Admin || mongoose.model<IAdmin>("Admin", adminSchema);

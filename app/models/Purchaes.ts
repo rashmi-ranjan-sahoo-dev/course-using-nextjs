@@ -11,4 +11,4 @@ const purchaseSchema = new Schema<IPurchase>({
     courseId: {type: Schema.Types.ObjectId, ref: "Course", required: true}
 })
 
-export const Purchase = models.Purchase || mongoose.model<IPurchase>("Purchase",purchaseSchema);
+export const PurchaseModel = models.Purchase || mongoose.model<IPurchase>("Purchase",purchaseSchema);
