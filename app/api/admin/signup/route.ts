@@ -45,11 +45,27 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "You are signed up" });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error("Error during admin signup:", error);
-    return NextResponse.json(
-      { message: "An error occurred during signup", error: error.message },
-      { status: 500 }
+  } catch (err: any) {
+  console.error("Error during admin signup:", err);
+
+  // Duplicate email error
+  if (err.code === 11000 && err.keyValue?.email) {
+    return new Response(
+      JSON.stringify({ error: `Email already exists: ${err.keyValue.email}` }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" }, // ✅ Add this
+      }
     );
   }
+
+  // Generic internal server error
+  return new Response(
+    JSON.stringify({ error: "Internal server error" }),
+    {
+      status: 500,
+      headers: { "Content-Type": "application/json" }, // ✅ Add this
+    }
+  );
+}
 }
