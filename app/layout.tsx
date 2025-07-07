@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "./components/Header/page";
+import MainApp from "./components/MainApp/page";
+import { AuthProvider } from "./components/ContextAPI/page";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,13 +24,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header/>
+        <AuthProvider>
+        <MainApp>
         {children}
+        </MainApp>
+        </AuthProvider>
       </body>
     </html>
   );
