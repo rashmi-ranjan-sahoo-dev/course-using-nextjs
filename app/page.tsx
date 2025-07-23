@@ -19,7 +19,7 @@
 
        {/* Button */}
       <div className="mt-4">
-        <button className="bg-orange-600 hover:bg-orange-500 transition-all duration-300 p-3 text-xl hover:text-2xl rounded-2xl cursor-pointer">
+        <button className="bg-orange-600  transition-all duration-300 p-3 text-xl hover:text-2xl rounded-2xl cursor-pointer">
           Explore Courses
         </button>
       </div>

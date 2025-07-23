@@ -8,21 +8,20 @@ import { MdManageAccounts } from "react-icons/md";
 import logo from '../../../public/assets/transparent_logo.png.png'
 import { useContext } from "react";
 import { AuthContext } from "../ContextAPI/page";
-//import Auth from "../Authentication/Auth";
-
+import Auth from "../Auth/page";
 
 export default function Header(){
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-const { isDark, setIsDark } = useContext(AuthContext); 
+const { isDark, setIsDark ,isActive, setIsActive } = useContext(AuthContext); 
 
 function toggleIsDark() {
     setIsDark(!isDark);
   }
 
-//   function toggleIsActive() {
-//     setIsActive(!isActive);
-//   }
+  function toggleIsActive() {
+    setIsActive(!isActive);
+  }
 
 
    return (
@@ -69,13 +68,15 @@ function toggleIsDark() {
               {isDark ? <FaRegSun /> : <FaRegMoon />}
               {/* <FaRegSun /> */}
             </div>
+            <div>
              <div
-        //   onClick={toggleIsActive}
+           onClick={toggleIsActive}
                 className="border text-sky-400 p-1 text-2xl rounded-full h-10 w-10 flex items-center justify-center cursor-pointer"
                  >
-                  {/* {isActive ? <MdManageAccounts /> : <Auth />} */}
-                   <MdManageAccounts />
-        </div>
+                  <MdManageAccounts /> 
+             </div>
+             {isActive && <Auth/>}
+             </div>
            </div>
     </nav>
    )

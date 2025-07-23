@@ -6,6 +6,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+
 
 // Zod schema with role & adminCode validation
 const signinSchema = z
@@ -34,6 +36,8 @@ const signinSchema = z
 type SigninData = z.infer<typeof signinSchema>;
 
 export default function SigninPage() {
+
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -55,10 +59,12 @@ export default function SigninPage() {
     try {
       const endpoint = data.role === "admin" ? "/api/admin/signin" : "/api/user/signin";
       const res = await axios.post(endpoint, data);
-
+      const token = res.data.token
+      localStorage.setItem("token", token);
+      
       setMessage("✅ Signin successful!");
       alert("✅ Signin successful!");
-      console.log("Token:", res.data.token);
+      router.push("/courses")
     } catch (error: any) {
       if (error.response?.data?.message) {
         alert(error.response.data.message);
