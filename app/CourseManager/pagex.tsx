@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -145,7 +146,7 @@ export default function CourseManager() {
       </h1>
 
       <form
-        className="space-y-4 border p-4 rounded bg-gray-50"
+        className="space-y-4 border p-4 rounded "
         onSubmit={handelSubmit}
       >
         <input
@@ -189,7 +190,8 @@ export default function CourseManager() {
         <h2 className="font-semibold text-lg">Videos</h2>
 
         {form.videos.map((video, index) => (
-          <div key={index} className="space-y-1 border p-2 rounded bg-white">
+          <div key={index} className="space-y-1 border p-2 rounded ">
+            <h1>Title</h1>
             <input
               type="text"
               placeholder="Video Title"
@@ -199,6 +201,7 @@ export default function CourseManager() {
               }
               className="w-full p-2 border rounded"
             />
+            <h1>video</h1>
             <input
               type="text"
               placeholder="Video URL"
@@ -206,6 +209,7 @@ export default function CourseManager() {
               onChange={(e) => handleVideoChange(index, 'url', e.target.value)}
               className="w-full p-2 border rounded"
             />
+            <h1>duration</h1>
             <input
               type="number"
               placeholder="Duration (seconds)"
@@ -237,14 +241,14 @@ export default function CourseManager() {
         <button
           type="button"
           onClick={addVideo}
-          className="bg-gray-200 p-2 rounded"
+          className=" p-2 rounded"
         >
           Add Video
         </button>
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 px-4 py-2 rounded"
         >
           {form.courseId ? 'Update Course' : 'Create Course'}
         </button>
@@ -255,7 +259,7 @@ export default function CourseManager() {
         {courses.map((course) => (
           <li
             key={course._id}
-            className="border p-4 rounded bg-white shadow-sm"
+            className="border p-4 rounded  shadow-sm"
           >
             <h3 className="text-lg font-semibold">{course.title}</h3>
             <p>{course.description}</p>

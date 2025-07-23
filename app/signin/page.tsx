@@ -64,10 +64,12 @@ export default function SigninPage() {
       
       setMessage("✅ Signin successful!");
       alert("✅ Signin successful!");
-      router.push("/courses")
+      if(data.role === "admin") router.push("/CourseManager");
+      else router.push("/courses")
     } catch (error: any) {
       if (error.response?.data?.message) {
         alert(error.response.data.message);
+        console.log(error.response.data.message);
       } else {
         console.error("Unexpected error:", error);
         alert("❌ Something went wrong.");

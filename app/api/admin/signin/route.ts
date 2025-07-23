@@ -18,13 +18,14 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-    const body = req.json();
+    const body = await req.json();
+   
     const parsed = schema.safeParse(body);
 
     if(!parsed.success){
         return NextResponse.json(
             {
-            message:"Incalid input", error: parsed.error.errors
+            message:"Incalid Input", error: parsed.error.errors
         },
     { status: 400 })
     }

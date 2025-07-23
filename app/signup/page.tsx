@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from 'next/navigation'
 
 // Zod schema with role & adminCode validation
 const adminSignupSchema = z
@@ -47,6 +48,8 @@ export default function AdminSignupPage() {
     },
   });
 
+  const router = useRouter();
+
   const selectedRole = watch("role");
 
   const [loading, setLoading] = useState(false);
@@ -61,6 +64,7 @@ export default function AdminSignupPage() {
       const res = await axios.post(endpoint, data);
       setMessage(res.data.message || "✅ Signed up successfully!");
       alert("✅ Signed up successfully!")
+      router.push("/signin")
     } catch (error: any) {
       if (error.response?.data?.error) {
         alert(error.response.data.error);

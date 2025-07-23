@@ -1,6 +1,11 @@
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export function Footer(){
+   const [date, setDate] = useState(0);
+  useEffect(()=>{
+      setDate(new Date().getFullYear())
+  },[])
     return  <footer className="bg-transparent border-t text-gray-500 px-6 py-10 mt-20">
             <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         
@@ -47,7 +52,7 @@ export function Footer(){
     
       {/* Bottom Footer */}
       <div className="mt-10 border-t pt-6 text-sm text-center text-gray-500">
-        © {new Date().getFullYear()} EduPlatform. All rights reserved.
+        © {date} EduPlatform. All rights reserved.
       </div>
     </footer>
       
