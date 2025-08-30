@@ -152,7 +152,7 @@ export default function CourseManager() {
         <input
           type="text"
           placeholder="Title"
-          value={form.title}
+          value={form.title ?? ""}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           className="w-full p-2 border rounded"
           required
