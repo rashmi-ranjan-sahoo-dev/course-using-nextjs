@@ -64,7 +64,7 @@ export default function SigninPage() {
       
       setMessage("✅ Signin successful!");
       alert("✅ Signin successful!");
-      if(data.role === "admin") router.push("/CourseManager");
+      if(data.role === "admin") router.push("/course-manager");
       else router.push("/courses")
     } catch (error: any) {
       if (error.response?.data?.message) {
