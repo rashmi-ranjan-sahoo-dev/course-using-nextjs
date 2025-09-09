@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -32,13 +31,17 @@ interface FormVideo {
 export default function CourseManager() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [form, setForm] = useState({
-    courseId: '',
-    title: '',
-    description: '',
+    courseId: "",
+    title: "",
+    description: "",
     price: 0,
-    imageUrl: '',
-    videos: [{ title: '', url: '', duration: '', isPreview: false }] as FormVideo[],
+    imageUrl: "",
+    videos: [{ title: "", url: "", duration: "", isPreview: false }] as FormVideo[],
   });
 
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function CourseManager() {
 
   const checkAdmin = async () => {
     try {
-      const res = await axios.get('/api/admin/me');
+      const res = await axios.get("/api/admin/me");
       setIsAdmin(res.data.isAdmin);
       if (res.data.isAdmin) {
         fetchCourses();
@@ -58,27 +61,27 @@ export default function CourseManager() {
   };
 
   const fetchCourses = async () => {
-    const res = await axios.get('/api/admin/course');
-    setCourses(res.data.courses);
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/admin/course");
+      setCourses(res.data.courses);
+    } catch {
+      setError("Failed to fetch courses.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVideoChange = (
-    index: number,
-    field: keyof FormVideo,
-    value: any
-  ) => {
+  const handleVideoChange = (index: number, field: keyof FormVideo, value: any) => {
     const updatedVideos = [...form.videos];
-    updatedVideos[index] = {
-      ...updatedVideos[index],
-      [field]: value,
-    };
+    updatedVideos[index] = { ...updatedVideos[index], [field]: value };
     setForm({ ...form, videos: updatedVideos });
   };
 
   const addVideo = () => {
     setForm({
       ...form,
-      videos: [...form.videos, { title: '', url: '', duration: '', isPreview: false }],
+      videos: [...form.videos, { title: "", url: "", duration: "", isPreview: false }],
     });
   };
 
@@ -87,35 +90,45 @@ export default function CourseManager() {
     setForm({ ...form, videos: updatedVideos });
   };
 
+  const resetForm = () => {
+    setForm({
+      courseId: "",
+      title: "",
+      description: "",
+      price: 0,
+      imageUrl: "",
+      videos: [{ title: "", url: "", duration: "", isPreview: false }],
+    });
+  };
+
   const handelSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError(null);
 
-    const payload = {
-      ...form,
-      price: form.price,
-      videos: form.videos.map((v) => ({
-        ...v,
-        duration: Number(v.duration),
-      })),
-    };
+    try {
+      const payload = {
+        ...form,
+        price: form.price,
+        videos: form.videos.map((v) => ({
+          ...v,
+          duration: Number(v.duration),
+        })),
+      };
 
-    if (form.courseId) {
-      await axios.put('/api/admin/course', payload);
-    } else {
-      await axios.post('/api/admin/course', payload);
+      if (form.courseId) {
+        await axios.put("/api/admin/course", payload);
+      } else {
+        await axios.post("/api/admin/course", payload);
+      }
+
+      fetchCourses();
+      resetForm();
+    } catch {
+      setError("Something went wrong while saving course.");
+    } finally {
+      setSubmitting(false);
     }
-
-    fetchCourses();
-
-    // reset form
-    setForm({
-      courseId: '',
-      title: '',
-      description: '',
-      price: 0,
-      imageUrl: '',
-      videos: [{ title: '', url: '', duration: '', isPreview: false }],
-    });
   };
 
   const handleEdit = (course: Course) => {
@@ -128,31 +141,44 @@ export default function CourseManager() {
       videos: course.videos.map((v) => ({
         title: v.title,
         url: v.url,
-        duration: v.duration?.toString() ?? '',
+        duration: v.duration?.toString() ?? "",
         isPreview: v.isPreview ?? false,
       })),
     });
   };
 
   const handleDelete = async (id: string) => {
-    await axios.delete('/api/admin/course', { data: { courseId: id } });
-    fetchCourses();
+    if (!confirm("Are you sure you want to delete this course?")) return;
+
+    try {
+      await axios.delete("/api/admin/course", { data: { courseId: id } });
+      fetchCourses();
+    } catch {
+      setError("Failed to delete course.");
+    }
   };
+
+  if (isAdmin === null) {
+    return <p className="text-center p-6">Checking admin access...</p>;
+  }
+
+  if (!isAdmin) {
+    return <p className="text-center p-6 text-red-600">You are not authorized.</p>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold">
-        {form.courseId ? 'Edit Course' : 'Create New Course'}
+        {form.courseId ? "Edit Course" : "Create New Course"}
       </h1>
 
-      <form
-        className="space-y-4 border p-4 rounded "
-        onSubmit={handelSubmit}
-      >
+      {error && <p className="text-red-600">{error}</p>}
+
+      <form className="space-y-4 border p-4 rounded" onSubmit={handelSubmit}>
         <input
           type="text"
           placeholder="Title"
-          value={form.title ?? ""}
+          value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           className="w-full p-2 border rounded"
           required
@@ -169,12 +195,7 @@ export default function CourseManager() {
           type="number"
           placeholder="Price"
           value={form.price.toString()}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              price: Number(e.target.value),
-            })
-          }
+          onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
           className="w-full p-2 border rounded"
           required
         />
@@ -190,42 +211,33 @@ export default function CourseManager() {
         <h2 className="font-semibold text-lg">Videos</h2>
 
         {form.videos.map((video, index) => (
-          <div key={index} className="space-y-1 border p-2 rounded ">
-            <h1>Title</h1>
+          <div key={index} className="space-y-1 border p-2 rounded">
             <input
               type="text"
               placeholder="Video Title"
               value={video.title}
-              onChange={(e) =>
-                handleVideoChange(index, 'title', e.target.value)
-              }
+              onChange={(e) => handleVideoChange(index, "title", e.target.value)}
               className="w-full p-2 border rounded"
             />
-            <h1>video</h1>
             <input
               type="text"
               placeholder="Video URL"
               value={video.url}
-              onChange={(e) => handleVideoChange(index, 'url', e.target.value)}
+              onChange={(e) => handleVideoChange(index, "url", e.target.value)}
               className="w-full p-2 border rounded"
             />
-            <h1>duration</h1>
             <input
               type="number"
               placeholder="Duration (seconds)"
               value={video.duration}
-              onChange={(e) =>
-                handleVideoChange(index, 'duration', e.target.value)
-              }
+              onChange={(e) => handleVideoChange(index, "duration", e.target.value)}
               className="w-full p-2 border rounded"
             />
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={video.isPreview}
-                onChange={(e) =>
-                  handleVideoChange(index, 'isPreview', e.target.checked)
-                }
+                onChange={(e) => handleVideoChange(index, "isPreview", e.target.checked)}
               />
               Is Preview
             </label>
@@ -238,54 +250,66 @@ export default function CourseManager() {
             </button>
           </div>
         ))}
+
         <button
           type="button"
           onClick={addVideo}
-          className=" p-2 rounded"
+          className="px-4 py-2 border rounded bg-gray-100"
         >
           Add Video
         </button>
 
         <button
           type="submit"
-          className="bg-blue-600 px-4 py-2 rounded"
+          disabled={submitting}
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
         >
-          {form.courseId ? 'Update Course' : 'Create Course'}
+          {submitting
+            ? "Saving..."
+            : form.courseId
+            ? "Update Course"
+            : "Create Course"}
         </button>
       </form>
 
       <h2 className="text-xl font-bold">All Courses</h2>
-      <ul className="space-y-4">
-        {courses.map((course) => (
-          <li
-            key={course._id}
-            className="border p-4 rounded  shadow-sm"
-          >
-            <h3 className="text-lg font-semibold">{course.title}</h3>
-            <p>{course.description}</p>
-            <p>₹{course.price}</p>
-            <img
-              src={course.imageUrl}
-              alt={course.title}
-              className="w-full max-w-xs h-32 object-cover my-2"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleEdit(course)}
-                className="text-blue-600"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(course._id)}
-                className="text-red-600"
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+
+      {loading ? (
+        <p>Loading courses...</p>
+      ) : courses.length === 0 ? (
+        <p className="text-gray-500">No courses available.</p>
+      ) : (
+        <ul className="space-y-4">
+          {courses.map((course) => (
+            <li key={course._id} className="border p-4 rounded shadow-sm">
+              <h3 className="text-lg font-semibold">{course.title}</h3>
+              <p>{course.description}</p>
+              <p>₹{course.price}</p>
+              {course.imageUrl && (
+                <img
+                  src={course.imageUrl}
+                  alt={course.title}
+                  className="w-full max-w-xs h-32 object-cover my-2"
+                />
+              )}
+              <div className="flex gap-4">
+                <button
+                  onClick={() => handleEdit(course)}
+                  className="text-blue-600"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(course._id)}
+                  className="text-red-600"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
