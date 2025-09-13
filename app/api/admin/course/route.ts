@@ -1,17 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAdmin } from "@/app/lib/verifyAdmin";
 import { CourseModel } from "@/app/models/Course";
 import { connectDB } from "@/app/lib/mongodb";
 
-
+// Create a course
 export async function POST(req: NextRequest) {
   try {
-    const adminId = verifyAdmin(req.headers);
+    await connectDB();
+
     const { title, description, imageUrl, price, videos } = await req.json();
 
-    if (!title || !description || !price || !imageUrl) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    if (!title || !description || price === undefined || !imageUrl) {
+  return NextResponse.json(
+    { error: "Missing required fields" },
+    { status: 400 }
+  );
+}
+
 
     const validVideos = Array.isArray(videos)
       ? videos.map((video) => ({
@@ -27,27 +32,33 @@ export async function POST(req: NextRequest) {
       description,
       price,
       imageUrl,
-      creatorId: adminId,
       videos: validVideos,
     });
 
-    return NextResponse.json({ message: "Course created", courseId: course._id });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return NextResponse.json({
+      message: "Course created",
+      courseId: course._id,
+    });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 401 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
+// Update a course
 export async function PUT(req: NextRequest) {
   try {
-    const adminId = verifyAdmin(req.headers);
-    const { title, description, price, imageUrl, courseId, videos } = await req.json();
+    await connectDB();
+
+    const { title, description, price, imageUrl, courseId, videos } =
+      await req.json();
 
     if (!courseId) {
-      return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Course ID is required" },
+        { status: 400 }
+      );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = { title, description, price, imageUrl };
 
     if (Array.isArray(videos)) {
@@ -59,66 +70,73 @@ export async function PUT(req: NextRequest) {
       }));
     }
 
-    const updatedCourse = await CourseModel.findOneAndUpdate(
-      { _id: courseId, creatorId: adminId },
+    const updatedCourse = await CourseModel.findByIdAndUpdate(
+      courseId,
       updateData,
       { new: true }
     );
 
     if (!updatedCourse) {
-      return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ message: "Course updated", course: updatedCourse });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return NextResponse.json({
+      message: "Course updated",
+      course: updatedCourse,
+    });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 401 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function GET(req: NextRequest) {
-
-  try{
+// Get all courses
+export async function GET() {
+  try {
     await connectDB();
-    const adminId = await verifyAdmin(req.headers);
-
-    const courses = await CourseModel.find({ createrId: adminId });
-
+    const courses = await CourseModel.find({});
     return NextResponse.json({ courses });
-  } catch(error){
+  } catch (error) {
     console.error("GET error:", error);
     return NextResponse.json(
-      { error: "Internal server error"},
-      { status: 500}
-    )
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-  
 }
 
+// Delete a course
 export async function DELETE(req: NextRequest) {
-  try{
+  try {
     await connectDB();
-    const adminId = await verifyAdmin(req.headers);
     const { courseId } = await req.json();
 
-    if(!courseId){
-      return NextResponse.json({ error: "Course ID is required"},
-        { status: 400 })
-      }
-        const deleteResult = await CourseModel.deleteOne({_id: courseId, creatorId: adminId})
+    if (!courseId) {
+      return NextResponse.json(
+        { error: "Course ID is required" },
+        { status: 400 }
+      );
+    }
 
-        if(deleteResult.deletedCount === 0){
-          return NextResponse.json({ error: "Course not found or unauthorized "}, { status: 404 })
-        }
+    const deleteResult = await CourseModel.deleteOne({ _id: courseId });
 
-        const courses = await CourseModel.find({ creatorId: adminId});
+    if (deleteResult.deletedCount === 0) {
+      return NextResponse.json(
+        { error: "Course not found" },
+        { status: 404 }
+      );
+    }
 
-        return NextResponse.json({ message:"Course deleted successfully", courses })
+    const courses = await CourseModel.find({});
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch(error: any){
-          console.error("DELETE Error:", error);
-         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }     
-}     
-
+    return NextResponse.json({
+      message: "Course deleted successfully",
+      courses,
+    });
+  } catch (error: any) {
+    console.error("DELETE Error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
