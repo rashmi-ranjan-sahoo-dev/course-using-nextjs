@@ -25,14 +25,14 @@ export default function Courses(){
     const [courses,setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string |null>(null);
+    const [purchasing, setPurchasing] = useState<string | null>(null);
 
     useEffect(()=>{
 
         const fetchCourses = async () =>{
         try {
             const res = await axios.get("api/admin/course");
-           const data = Array.isArray(res.data) ? res.data: res.data.courses;
-           setCourses(data || [])
+                   setCourses(Array.isArray(res.data) ? res.data : res.data.courses);
         } catch(err: any){
             setError(err.response?.data?.error || "failed to fetch courses")
         } finally {
@@ -40,8 +40,20 @@ export default function Courses(){
         }
     }
     fetchCourses();
-
     },[])
+
+    const handlePurchase = async (courseId: string) =>{
+        try{
+            setPurchasing(courseId);
+
+            await axios.post("/api/user/purchases", {courseId});
+            alert("course purchased successfully!")
+        } catch (err: any){
+            alert(err.response?.data?.error || "Failed to purchase course.")
+        } finally {
+            setPurchasing(null);
+        }
+    }
 
 
     if(loading) return <p className="text-center">Loading Courses .....</p>
@@ -82,6 +94,12 @@ export default function Courses(){
                                     ))}
                                 </ul>
                             </div>
+                                <button
+                       onClick={() => handlePurchase(course._id)}
+                       disabled = {purchasing === course._id}
+                       className="w-fit bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+                        {purchasing === course._id ? "Processing...": "Buy Course"}
+                       </button>
                         </div>
                        ) )}
                      </div>
