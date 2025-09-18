@@ -184,7 +184,7 @@ export default function CourseManager() {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           {submitting ? "Saving..." : "Create Course"}
         </button>
