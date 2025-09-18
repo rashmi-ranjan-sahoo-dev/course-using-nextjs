@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PurchaseModel } from "@/app/models/Purchaes";
 import { connectDB } from "@/app/lib/mongodb";
+// import { CourseModel } from "@/app/models/Course";
 
 
 export async function POST(req: NextRequest){

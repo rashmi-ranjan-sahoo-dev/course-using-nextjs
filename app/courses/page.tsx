@@ -13,7 +13,7 @@ interface Video {
 
 interface Course {
     _id: string;
-    titile: string;
+    title: string;
     description: string;
     price: number;
     imageUrl: string;
@@ -26,8 +26,22 @@ export default function Courses(){
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string |null>(null);
     const [purchasing, setPurchasing] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(()=>{
+
+        // get userId from localStorage
+
+        const storedUser = localStorage.getItem("user");
+        if(storedUser){
+            try{
+                const parsed = JSON.parse(storedUser);
+                setUserId(parsed._id);
+            } catch(e: any) {
+                console.log(e);
+                console.error("invalid user data ")
+            }
+        }
 
         const fetchCourses = async () =>{
         try {
@@ -43,10 +57,16 @@ export default function Courses(){
     },[])
 
     const handlePurchase = async (courseId: string) =>{
+
+          if (!userId) {
+                alert("You must be logged in to purchase a course.");
+                return;
+              }
+
         try{
             setPurchasing(courseId);
 
-            await axios.post("/api/user/purchases", {courseId});
+            await axios.post("/api/purchases", {userId,courseId});
             alert("course purchased successfully!")
         } catch (err: any){
             alert(err.response?.data?.error || "Failed to purchase course.")
@@ -74,11 +94,11 @@ export default function Courses(){
                             {course.imageUrl &&(
                                 <img 
                                 src = {course.imageUrl}
-                                alt={course.titile}
+                                alt={course.title}
                                 className="w-fullh-40 object-cover rounded"
                                />
                             )}
-                            <h2 className="text-xl font-semibold">{course.titile}</h2>
+                            <h2 className="text-xl font-semibold">{course.title}</h2>
                             <p className="text-gary-700">{course.description}</p>
                             <p className="font-bold">₹{course.price}</p>
 
